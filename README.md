@@ -4,4 +4,4 @@
 
 - pyqt6
 - fastapi
-- uWebsocket-bindings
+- websockets
