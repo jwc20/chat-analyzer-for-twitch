@@ -5,7 +5,7 @@ import asyncio
 import websockets
 
 
-async def chat_client():
+async def connect():
     uri = "wss://irc-ws.chat.twitch.tv:443"
 
     # TODO: Authenticate
@@ -21,3 +21,7 @@ async def chat_client():
             # message
 
             print(part[1], part[2])
+
+
+if __name__ == "__main__": 
+    asyncio.run(connect())
