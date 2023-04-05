@@ -1,7 +1,12 @@
 # twitch-auto-mod
 
-### Tools
+### Requirements
 
-- pyqt6
+- PyQt6
 - fastapi
 - websockets
+- pandas
+- matplotlib
+- seaborn 
+- nltk 
+- scikit-learn
