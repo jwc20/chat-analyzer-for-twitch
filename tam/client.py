@@ -12,6 +12,7 @@ from collections import deque
 # CLIENT_SECRET = 'your_client_secret'
 # CHANNEL_NAME = 'target_channel_name' # Must be lowercase. (e.g. 'theprimeagen')
 
+
 MAX_MESSAGES = 100
 messages_queue = deque(maxlen=MAX_MESSAGES)
 
@@ -33,36 +34,12 @@ async def get_channel_id(channel_name, token):
             return data["data"][0]["id"]
 
 
-# class ChatReceiver(QThread):
-#     message_received = pyqtSignal(str)
-
-#     async def receive_chat_messages(self, channel_name):
-#         token = await get_oauth_token(CLIENT_ID, CLIENT_SECRET)
-#         channel_id = await get_channel_id(channel_name, token)
-
-#         websocket_url = f"wss://irc-ws.chat.twitch.tv:443"
-#         async with websockets.connect(websocket_url) as websocket:
-#             # Send authentication and join channel
-#             await websocket.send(f"PASS oauth:{token}")
-#             await websocket.send(f"NICK justinfan123")  # for read-only
-#             await websocket.send(f"JOIN #{channel_name}")
-
-#             # Receive messages
-#             while True:
-#                 message = await websocket.recv()
-#                 self.message_received.emit(message)
-
-#     def run(self):
-#         asyncio.run(self.receive_chat_messages(CHANNEL_NAME))
-
-
 class ChatReceiver(QThread):
     message_received = pyqtSignal(str)
 
     async def receive_chat_messages(self, channel_name):
         token = await get_oauth_token(CLIENT_ID, CLIENT_SECRET)
         channel_id = await get_channel_id(channel_name, token)
-
         websocket_url = f"wss://irc-ws.chat.twitch.tv:443"
 
         # Keep reconnecting and receiving messages
@@ -70,7 +47,7 @@ class ChatReceiver(QThread):
             try:
                 async with websockets.connect(websocket_url) as websocket:
                     await websocket.send(f"PASS oauth:{token}")
-                    await websocket.send(f"NICK justinfan123") # for read-only
+                    await websocket.send(f"NICK justinfan123")  # for read-only
                     await websocket.send(f"JOIN #{channel_name}")
 
                     while True:
@@ -89,7 +66,6 @@ class ChatReceiver(QThread):
 class ChatWindow(QWidget):
     def __init__(self):
         super().__init__()
-
         self.init_ui()
 
     def init_ui(self):
