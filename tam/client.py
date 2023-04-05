@@ -70,6 +70,7 @@ class ChatWindow(QWidget):
 
     def init_ui(self):
         self.setWindowTitle("Chat")
+        self.setGeometry(300, 300, 600, 600)
 
         self.layout = QVBoxLayout()
 
