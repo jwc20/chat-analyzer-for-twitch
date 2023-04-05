@@ -3,10 +3,12 @@
 ### Requirements
 
 - PyQt6
-- fastapi
+- aiohttp
+- asyncio
 - websockets
+- fastapi
 - pandas
 - matplotlib
-- seaborn 
-- nltk 
+- seaborn
+- nltk
 - scikit-learn
