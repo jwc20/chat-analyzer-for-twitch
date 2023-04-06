@@ -1,4 +1,4 @@
-# twitch-auto-mod
+# chat-analyzer-for-twitch
 
 ### Requirements
 
