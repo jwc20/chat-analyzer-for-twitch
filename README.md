@@ -2,14 +2,30 @@
 
 ### Requirements
 
+##### GUI
+
 - PyQt6
-- ipfshttpclient
+
+##### IRC
+
 - aiohttp
 - asyncio
 - websockets
-- fastapi
+
+##### ML Classifier
+
 - pandas
 - matplotlib
 - seaborn
 - nltk
 - scikit-learn
+
+##### IPFS Storage
+
+- ipfshttpclient
+- requests
+- urllib3
+
+##### RESTful API
+
+- fastapi
