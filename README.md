@@ -3,6 +3,7 @@
 ### Requirements
 
 - PyQt6
+- ipfshttpclient
 - aiohttp
 - asyncio
 - websockets
