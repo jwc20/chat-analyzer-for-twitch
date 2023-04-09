@@ -3,6 +3,6 @@
 
 - Format chat messages.
 
-- Use fastapi to create endpoint for returning chat in json response. 
+- Create system tray and mac menu bar app.
 
 - Create options to get chat data from twitch vods. ([Use TwitchDownloader](https://github.com/lay295/TwitchDownloader))

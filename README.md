@@ -5,6 +5,7 @@
 ##### GUI
 
 - PyQt6
+- pyqtgraph
 
 ##### IRC
 
@@ -25,7 +26,3 @@
 - ipfshttpclient
 - requests
 - urllib3
-
-##### RESTful API
-
-- fastapi
