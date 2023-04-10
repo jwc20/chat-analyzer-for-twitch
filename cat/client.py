@@ -7,6 +7,9 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLine
 from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
 from collections import deque
 
+import re
+from datetime import datetime
+
 # Set credentials
 # CLIENT_ID = 'your_client_id'
 # CLIENT_SECRET = 'your_client_secret'
@@ -31,6 +34,7 @@ async def get_channel_id(channel_name, token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             data = await response.json()
+            # print(data)
             return data["data"][0]["id"]
 
 
@@ -50,10 +54,39 @@ class ChatReceiver(QThread):
                     await websocket.send(f"NICK justinfan123")  # for read-only
                     await websocket.send(f"JOIN #{channel_name}")
 
+                    counter = 0
+                    after_end_of_names = False
+
                     while True:
                         message = await websocket.recv()
+                        message = message.strip().replace("\n", "")
+
+                        if not after_end_of_names:
+                            match = re.search(r":End of /NAMES list", message)
+                            if match:
+                                after_end_of_names = True
+                            continue
+
+                        counter += 1 # Use to get total message count.
+
+                        # use regular expression to extract the username and chat.
+                        match_nick = re.search(r"@(\w+)\.tmi\.twitch\.tv", message)
+                        match_chat = re.search(r"PRIVMSG #\w+ :(.*)", message)
+
+                        username = match_nick.group(1) if match_nick else ""
+                        chat_message = match_chat.group(1) if match_chat else ""
+
+                        current_time = datetime.now().strftime("%H:%M:%S")
+
                         messages_queue.append(message)
-                        self.message_received.emit(message)
+                        # self.message_received.emit(message)
+                        self.message_received.emit(
+                            f"[{current_time}] <{username}> {chat_message}"
+                        )
+
+            # except websockets.ConnectionClosed:
+            #     continue
+
             except Exception as e:
                 print(f"WebSocket Error: {e}")
                 print("Reconnecting...")
