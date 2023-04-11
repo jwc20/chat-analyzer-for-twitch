@@ -5,7 +5,7 @@ import aiohttp
 import websockets
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
 from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
-from collections import deque
+from collections import deque, namedtuple
 
 import re
 from datetime import datetime
@@ -67,22 +67,12 @@ class ChatReceiver(QThread):
                                 after_end_of_names = True
                             continue
 
-                        counter += 1 # Use to get total message count.
-
-                        # use regular expression to extract the username and chat.
-                        match_nick = re.search(r"@(\w+)\.tmi\.twitch\.tv", message)
-                        match_chat = re.search(r"PRIVMSG #\w+ :(.*)", message)
-
-                        username = match_nick.group(1) if match_nick else ""
-                        chat_message = match_chat.group(1) if match_chat else ""
-
-                        current_time = datetime.now().strftime("%H:%M:%S")
+                        counter += 1  # Use to get total message count.
 
                         messages_queue.append(message)
-                        # self.message_received.emit(message)
-                        self.message_received.emit(
-                            f"[{current_time}] <{username}> {chat_message}"
-                        )
+                        self.message_received.emit(message)
+
+
 
             # except websockets.ConnectionClosed:
             #     continue
@@ -95,6 +85,17 @@ class ChatReceiver(QThread):
     def run(self):
         asyncio.run(self.receive_chat_messages(CHANNEL_NAME))
 
+# Chat = namedtuple(
+#     "Chat",
+#     [
+#         "username",
+#         "message",
+#         "is_toxic",
+#         "is_profanity",
+#         "is_hate_speech",
+#         "is_highlighted",
+#     ],
+# )
 
 class ChatWindow(QWidget):
     def __init__(self):
@@ -114,8 +115,23 @@ class ChatWindow(QWidget):
         self.setLayout(self.layout)
 
     @pyqtSlot(str)
-    def update_chat(self, message):
-        self.text_edit.append(message)
+    def update_chat(self, message): # TODO: Add highlight to toxic messages.
+
+        # use regular expression to extract the username and chat.
+        match_nick = re.search(r"@(\w+)\.tmi\.twitch\.tv", message)
+        match_chat = re.search(r"PRIVMSG #\w+ :(.*)", message)
+
+        username = match_nick.group(1) if match_nick else ""
+        chat_message = match_chat.group(1) if match_chat else ""
+
+        current_time = datetime.now().strftime("%H:%M:%S")
+        # self.message_received.emit(
+            # f"[{current_time}] <{username}> {chat_message}"
+        # )
+
+        # print(message)
+        # self.text_edit.append(message)
+        self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
 
 
 def main():
