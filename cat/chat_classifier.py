@@ -30,12 +30,15 @@ from sklearn.metrics import classification_report
 
 import ipfshttpclient as ipfs
 
+import json
+
 hashes = [
-    "QmUXzDZd3ZAheJX42RgGjE2xVkNP6soUztjnMmkuzdCHxW", # toxic
-    "QmQmRDR9QT8UT5J3Qbtgt2R3S4xW6SyGeEAJ9cB7thT31R", # profanity 
-    "QmaQuhGXA3QXQMn4jAUMLkFyxXyevwXvCMVj4zLzSvmnDY", # hate speech
+    "QmWuhT48hnMHsaMpoX6eKPwx4PVTUbiJvy3YmkHMx8NH6v", # toxicity
+    "QmQDS4wxcAG5fVqmyfuwMn2pSpM1XQRcgWG8Mem5cU2p6J", # profanity
+    "QmZaVmGwq5WnryXowJk18Dp5i8NtuPbcvhdMNdK5oBXRMe", # hate speech
 ]
 
+# TODO: create separate class for ipfs.
 
 class ChatClassifier:
     """
@@ -58,17 +61,10 @@ class ChatClassifier:
         # self.train()
 
     def load_data(self, hash): 
-        data = self._client.cat(hash)
+        # data = self._client.cat(hash)
+        data = self._client.get_json(hash)
         return data
 
-
-        # toxicity = client.cat(self.toxicity_hash)
-        # profanity = client.cat(self.profanity_hash)
-        # hate_speech = client.cat(self.hate_speech_hash)
-        # toxicity = toxicity.decode('utf-8')
-        # profanity = profanity.decode('utf-8')
-        # hate_speech = hate_speech.decode('utf-8')
-        # print(toxicity[0])
 
     def preprocess(self):
         pass
@@ -88,5 +84,17 @@ class ChatClassifier:
 
 if __name__ == "__main__":
     classifier = ChatClassifier()
-    data = classifier.load_data(classifier.profanity_hash)
-    print(data)
+    data_toxicity = classifier.load_data(classifier.toxicity_hash)
+    toxicity_json = json.dumps(data_toxicity)
+    toxicity = pd.read_json(toxicity_json)
+    # print(toxicity)
+
+    pipeline = Pipeline([ 
+        ("vectorizer", CountVectorizer()), 
+        ("tfidf", TfidfTransformer()),
+        ("clf", MultinomialNB())
+    ])
+
+    pipeline.fit(toxicity["text"], toxicity["Is this text toxic?"])
+    predictions = pipeline.predict(["this is a toxic text", "this is not a toxic text"])
+    print(predictions)
