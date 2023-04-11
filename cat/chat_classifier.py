@@ -1,7 +1,7 @@
 # import all the libraries needed to build a toxicity classifier
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 import nltk
@@ -28,6 +28,15 @@ from sklearn.metrics import average_precision_score
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import classification_report
 
+import ipfshttpclient as ipfs
+
+hashes = [
+    "QmUXzDZd3ZAheJX42RgGjE2xVkNP6soUztjnMmkuzdCHxW", # toxic
+    "QmQmRDR9QT8UT5J3Qbtgt2R3S4xW6SyGeEAJ9cB7thT31R", # profanity 
+    "QmaQuhGXA3QXQMn4jAUMLkFyxXyevwXvCMVj4zLzSvmnDY", # hate speech
+]
+
+
 class ChatClassifier:
     """
     Classify chat messages as toxic, profanity, hate speech, or highlighted.
@@ -37,13 +46,34 @@ class ChatClassifier:
         - send the result to the chat window.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, toxicity_hash=hashes[0], profanity_hash=hashes[1], hate_speech_hash=hashes[2]):
+        self._client = ipfs.connect("/ip4/127.0.0.1/tcp/5002")
+        self.toxicity_hash = toxicity_hash
+        self.profanity_hash = profanity_hash
+        self.hate_speech_hash = hate_speech_hash
+        self.vectorizer = CountVectorizer() 
+        self.classifier = MultinomialNB()
+        self.train_data = None 
+        self.train_labels = None 
+        # self.train()
 
-    def load_data(self):
-        pass
+    def load_data(self, hash): 
+        data = self._client.cat(hash)
+        return data
+
+
+        # toxicity = client.cat(self.toxicity_hash)
+        # profanity = client.cat(self.profanity_hash)
+        # hate_speech = client.cat(self.hate_speech_hash)
+        # toxicity = toxicity.decode('utf-8')
+        # profanity = profanity.decode('utf-8')
+        # hate_speech = hate_speech.decode('utf-8')
+        # print(toxicity[0])
 
     def preprocess(self):
+        pass
+
+    def train(self):
         pass
 
     def classify(self):
@@ -51,3 +81,12 @@ class ChatClassifier:
 
     def get_result(self):
         pass
+
+    def ipfs_close(self):
+        self._client.close()
+        pass
+
+if __name__ == "__main__":
+    classifier = ChatClassifier()
+    data = classifier.load_data(classifier.profanity_hash)
+    print(data)
