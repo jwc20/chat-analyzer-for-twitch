@@ -45,7 +45,6 @@ frozenlist==1.3.3
 greenlet==2.0.2
 idna==3.4
 imagesize==1.4.1
--e git+ssh://git@github.com/jwc20/py-ipfs-http-client.git@80f6e8ad73f7c3ce49b9d7cbd8554e8ead3369ea#egg=ipfshttpclient
 ipykernel==6.22.0
 ipython==8.12.0
 ipython-genutils==0.2.0
@@ -177,3 +176,5 @@ widgetsnbextension==4.0.7
 y-py==0.5.9
 yarl==1.8.2
 ypy-websocket==0.8.2
+git+https://github.com/jwc20/py-ipfs-http-client@c4abfb0#ipfshttpclient
+
