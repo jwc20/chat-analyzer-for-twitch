@@ -10,10 +10,8 @@ from collections import deque, namedtuple
 import re
 from datetime import datetime
 
-# Set credentials
-# CLIENT_ID = 'your_client_id'
-# CLIENT_SECRET = 'your_client_secret'
-# CHANNEL_NAME = 'target_channel_name' # Must be lowercase. (e.g. 'theprimeagen')
+from chat_classifier import ChatClassifier
+from config import CLIENT_ID, CLIENT_SECRET, CHANNEL_NAME
 
 
 MAX_MESSAGES = 100
@@ -72,8 +70,6 @@ class ChatReceiver(QThread):
                         messages_queue.append(message)
                         self.message_received.emit(message)
 
-
-
             # except websockets.ConnectionClosed:
             #     continue
 
@@ -84,6 +80,7 @@ class ChatReceiver(QThread):
 
     def run(self):
         asyncio.run(self.receive_chat_messages(CHANNEL_NAME))
+
 
 # Chat = namedtuple(
 #     "Chat",
@@ -97,10 +94,15 @@ class ChatReceiver(QThread):
 #     ],
 # )
 
+
+
+
 class ChatWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
+
+        self.classifier = ChatClassifier()
 
     def init_ui(self):
         self.setWindowTitle("Chat")
@@ -115,22 +117,15 @@ class ChatWindow(QWidget):
         self.setLayout(self.layout)
 
     @pyqtSlot(str)
-    def update_chat(self, message): # TODO: Add highlight to toxic messages.
-
-        # use regular expression to extract the username and chat.
+    def update_chat(self, message):
         match_nick = re.search(r"@(\w+)\.tmi\.twitch\.tv", message)
         match_chat = re.search(r"PRIVMSG #\w+ :(.*)", message)
 
+        current_time = datetime.now().strftime("%H:%M:%S")
         username = match_nick.group(1) if match_nick else ""
         chat_message = match_chat.group(1) if match_chat else ""
 
-        current_time = datetime.now().strftime("%H:%M:%S")
-        # self.message_received.emit(
-            # f"[{current_time}] <{username}> {chat_message}"
-        # )
-
-        # print(message)
-        # self.text_edit.append(message)
+        # TODO: classify the chat message
         self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
 
 
