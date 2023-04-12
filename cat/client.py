@@ -1,26 +1,22 @@
+import os
+import re
 import sys
 import asyncio
 import json
 import aiohttp
 import websockets
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
-from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+from datetime import datetime
 from collections import deque, namedtuple
 
-import re
-from datetime import datetime
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
+from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QColor, QTextCharFormat, QFont
+
 
 from chat_classifier import ChatClassifier
 
-import os
-# print(os.getcwd())
-
-
-# import config file from parent directory
-# sys.path.append(".")
 sys.path.append(os.getcwd())
 from config import CLIENT_ID, CLIENT_SECRET, CHANNEL_NAME
-
 
 MAX_MESSAGES = 100
 messages_queue = deque(maxlen=MAX_MESSAGES)
@@ -132,6 +128,21 @@ class ChatWindow(QWidget):
         chat_message = match_chat.group(1) if match_chat else ""
 
         # TODO: classify the chat message
+        # self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
+
+         # Classify the chat message
+        classification = self.classifier.get_result(chat_message)
+
+        # Set the default format
+        text_format = QTextCharFormat()
+        # text_format.setFont(QFont("Arial", 10))
+
+        # Highlight toxic messages
+        if classification == "toxic":
+            text_format.setForeground(QColor("red"))
+
+        # Add the formatted message to the QTextEdit
+        self.text_edit.setCurrentCharFormat(text_format)
         self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
 
 
