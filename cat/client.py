@@ -11,6 +11,14 @@ import re
 from datetime import datetime
 
 from chat_classifier import ChatClassifier
+
+import os
+# print(os.getcwd())
+
+
+# import config file from parent directory
+# sys.path.append(".")
+sys.path.append(os.getcwd())
 from config import CLIENT_ID, CLIENT_SECRET, CHANNEL_NAME
 
 
@@ -93,8 +101,6 @@ class ChatReceiver(QThread):
 #         "is_highlighted",
 #     ],
 # )
-
-
 
 
 class ChatWindow(QWidget):
