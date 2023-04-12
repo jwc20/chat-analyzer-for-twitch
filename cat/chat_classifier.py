@@ -57,6 +57,7 @@ class ChatClassifier:
     def train(self):
         # TODO: train the model for profanity and hate speech.
         dataset = self.load_dataset(self.toxicity_hash)
+        # print(dataset.head()) 
         self.pipeline.fit(dataset["text"], dataset["Is this text toxic?"])
 
     def classify(self, message):
@@ -66,7 +67,8 @@ class ChatClassifier:
 
     def get_result(self, message):
         classification = self.classify(message)
-        if classification == 1:
+        # print(f"Classification: {classification}")
+        if classification == "Toxic":
             return "toxic"
         else:
             return "non-toxic"
@@ -75,11 +77,10 @@ class ChatClassifier:
         self._client.close()
 
 
-if __name__ == "__main__":
-    classifier = ChatClassifier()
-    message = "this is a toxic text"
-    result = classifier.get_result(message)
-    print(f"The message '{message}' is {result}.")
-    # TODO: Maybe return as tuple (message, result).
-
-    classifier.ipfs_close()
+# if __name__ == "__main__":
+#     classifier = ChatClassifier()
+#     message = "this is a toxic text"
+#     message = "FUCK YOU"
+#     result = classifier.get_result(message)
+#     print(f"The message '{message}' is {result}.")
+#     classifier.ipfs_close()
