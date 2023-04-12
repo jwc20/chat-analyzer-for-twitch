@@ -127,9 +127,6 @@ class ChatWindow(QWidget):
         username = match_nick.group(1) if match_nick else ""
         chat_message = match_chat.group(1) if match_chat else ""
 
-        # TODO: classify the chat message
-        # self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
-
          # Classify the chat message
         classification = self.classifier.get_result(chat_message)
 
