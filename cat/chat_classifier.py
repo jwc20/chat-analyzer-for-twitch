@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
+
 import ipfshttpclient as ipfs
 
 import json
@@ -18,13 +19,6 @@ hashes = [
 
 
 class ChatClassifier:
-    """
-    Classify chat messages as toxic, profanity, hate speech, or highlighted.
-    TODO:
-        - get data from the ipfs node.
-        - classify the chat messages.
-        - send the result to the chat window.
-    """
 
     def __init__(
         self,
@@ -57,7 +51,7 @@ class ChatClassifier:
     def train(self):
         # TODO: train the model for profanity and hate speech.
         dataset = self.load_dataset(self.toxicity_hash)
-        # print(dataset.head()) 
+        # print(dataset.head())
         self.pipeline.fit(dataset["text"], dataset["Is this text toxic?"])
 
     def classify(self, message):
@@ -72,6 +66,13 @@ class ChatClassifier:
             return "toxic"
         else:
             return "non-toxic"
+
+    def get_toxicity_likelihood(self, message):
+        probabilities = self.pipeline.predict_proba([message])
+        toxic_probability = probabilities[0][1]  # Assuming index 1 corresponds to the "Toxic" class
+        toxic_percentage = round(toxic_probability * 100, 1)
+        return toxic_percentage
+
 
     def ipfs_close(self):
         self._client.close()

@@ -2,11 +2,10 @@ import os
 import re
 import sys
 import asyncio
-import json
 import aiohttp
 import websockets
 from datetime import datetime
-from collections import deque, namedtuple
+from collections import deque
 
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
 from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
@@ -45,7 +44,7 @@ class ChatReceiver(QThread):
 
     async def receive_chat_messages(self, channel_name):
         token = await get_oauth_token(CLIENT_ID, CLIENT_SECRET)
-        channel_id = await get_channel_id(channel_name, token)
+        # channel_id = await get_channel_id(channel_name, token)
         websocket_url = f"wss://irc-ws.chat.twitch.tv:443"
 
         # Keep reconnecting and receiving messages
@@ -127,20 +126,27 @@ class ChatWindow(QWidget):
         username = match_nick.group(1) if match_nick else ""
         chat_message = match_chat.group(1) if match_chat else ""
 
+        # TODO: Use tuple to store chat data
+
          # Classify the chat message
         classification = self.classifier.get_result(chat_message)
 
+        # Get the toxicity likelihood percentage
+        likelihood = self.classifier.get_toxicity_likelihood(chat_message)
+
         # Set the default format
         text_format = QTextCharFormat()
-        # text_format.setFont(QFont("Arial", 10))
+        text_format.setFont(QFont("Arial", 14))
 
         # Highlight toxic messages
         if classification == "toxic":
-            text_format.setForeground(QColor("red"))
+            if likelihood >= 70:
+                text_format.setBackground(QColor("red"))
+            # text_format.setForeground(QColor("red"))
 
         # Add the formatted message to the QTextEdit
         self.text_edit.setCurrentCharFormat(text_format)
-        self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
+        self.text_edit.append(f"[{current_time}] <{username}> {likelihood}% {chat_message}")
 
 
 def main():
