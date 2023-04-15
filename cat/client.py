@@ -7,7 +7,7 @@ import websockets
 from datetime import datetime
 from collections import deque
 
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit
 from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QColor, QTextCharFormat, QFont
 
@@ -140,13 +140,15 @@ class ChatWindow(QWidget):
 
         # Highlight toxic messages
         if classification == "toxic":
-            if likelihood >= 70:
+            if likelihood >= 80:
                 text_format.setBackground(QColor("red"))
+            elif likelihood >= 60 and likelihood < 80:
+                text_format.setBackground(QColor("orange"))
             # text_format.setForeground(QColor("red"))
 
         # Add the formatted message to the QTextEdit
         self.text_edit.setCurrentCharFormat(text_format)
-        self.text_edit.append(f"[{current_time}] <{username}> {likelihood}% {chat_message}")
+        self.text_edit.append(f"[{current_time}] <{username}> ({likelihood}%) {chat_message}")
 
 
 def main():
