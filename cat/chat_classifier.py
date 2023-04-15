@@ -4,7 +4,6 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
-
 import ipfshttpclient as ipfs
 
 import json
@@ -49,13 +48,10 @@ class ChatClassifier:
         return json_data
 
     def train(self):
-        # TODO: train the model for profanity and hate speech.
         dataset = self.load_dataset(self.toxicity_hash)
-        # print(dataset.head())
         self.pipeline.fit(dataset["text"], dataset["Is this text toxic?"])
 
     def classify(self, message):
-        # predictions = self.pipeline.predict(["this is a toxic text", "this is not a toxic text"])
         predictions = self.pipeline.predict([message])[0]
         return predictions
 
@@ -68,6 +64,8 @@ class ChatClassifier:
             return "non-toxic"
 
     def get_toxicity_likelihood(self, message):
+        # Note that this is not the best indicator of toxicity since it only looks at individual words rather than the context.
+        # This is essentially a profanity filter.
         probabilities = self.pipeline.predict_proba([message])
         toxic_probability = probabilities[0][1]  # Assuming index 1 corresponds to the "Toxic" class
         toxic_percentage = round(toxic_probability * 100, 1)
