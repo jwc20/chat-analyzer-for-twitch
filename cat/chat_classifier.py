@@ -57,11 +57,12 @@ class ChatClassifier:
 
     def get_result(self, message):
         classification = self.classify(message)
+        return classification
         # print(f"Classification: {classification}")
-        if classification == "Toxic":
-            return "toxic"
-        else:
-            return "non-toxic"
+        # if classification == "Toxic":
+        #     return "toxic"
+        # else:
+        #     return "non-toxic"
 
     def get_toxicity_likelihood(self, message):
         # Note that this is not the best indicator of toxicity since it only looks at individual words rather than the context.

@@ -132,23 +132,24 @@ class ChatWindow(QWidget):
         classification = self.classifier.get_result(chat_message)
 
         # Get the toxicity likelihood percentage
-        likelihood = self.classifier.get_toxicity_likelihood(chat_message)
+        # likelihood = self.classifier.get_toxicity_likelihood(chat_message)
 
         # Set the default format
         text_format = QTextCharFormat()
         text_format.setFont(QFont("Arial", 14))
 
         # Highlight toxic messages
-        if classification == "toxic":
-            if likelihood >= 80:
-                text_format.setBackground(QColor("red"))
-            elif likelihood >= 60 and likelihood < 80:
-                text_format.setBackground(QColor("orange"))
-            # text_format.setForeground(QColor("red"))
+        if classification == "Toxic":
+            # if likelihood >= 80:
+            #     text_format.setBackground(QColor("red"))
+            # elif likelihood >= 60 and likelihood < 80:
+            #     text_format.setBackground(QColor("orange"))
+            text_format.setBackground(QColor("red"))
 
         # Add the formatted message to the QTextEdit
         self.text_edit.setCurrentCharFormat(text_format)
-        self.text_edit.append(f"[{current_time}] <{username}> ({likelihood}%) {chat_message}")
+        # self.text_edit.append(f"[{current_time}] <{username}> ({likelihood}%) {chat_message}")
+        self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
 
 
 def main():
