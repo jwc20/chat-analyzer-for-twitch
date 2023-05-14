@@ -1,17 +1,21 @@
+import os
+import re
 import sys
 import asyncio
-import json
 import aiohttp
 import websockets
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit
-from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+from datetime import datetime
 from collections import deque
 
-# Set credentials
-# CLIENT_ID = 'your_client_id'
-# CLIENT_SECRET = 'your_client_secret'
-# CHANNEL_NAME = 'target_channel_name' # Must be lowercase. (e.g. 'theprimeagen')
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit
+from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QColor, QTextCharFormat, QFont
 
+
+from chat_classifier import ChatClassifier
+
+sys.path.append(os.getcwd())
+from config import CLIENT_ID, CLIENT_SECRET, CHANNEL_NAME
 
 MAX_MESSAGES = 100
 messages_queue = deque(maxlen=MAX_MESSAGES)
@@ -31,6 +35,7 @@ async def get_channel_id(channel_name, token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             data = await response.json()
+            # print(data)
             return data["data"][0]["id"]
 
 
@@ -39,7 +44,7 @@ class ChatReceiver(QThread):
 
     async def receive_chat_messages(self, channel_name):
         token = await get_oauth_token(CLIENT_ID, CLIENT_SECRET)
-        channel_id = await get_channel_id(channel_name, token)
+        # channel_id = await get_channel_id(channel_name, token)
         websocket_url = f"wss://irc-ws.chat.twitch.tv:443"
 
         # Keep reconnecting and receiving messages
@@ -50,10 +55,27 @@ class ChatReceiver(QThread):
                     await websocket.send(f"NICK justinfan123")  # for read-only
                     await websocket.send(f"JOIN #{channel_name}")
 
+                    counter = 0
+                    after_end_of_names = False
+
                     while True:
                         message = await websocket.recv()
+                        message = message.strip().replace("\n", "")
+
+                        if not after_end_of_names:
+                            match = re.search(r":End of /NAMES list", message)
+                            if match:
+                                after_end_of_names = True
+                            continue
+
+                        counter += 1  # Use to get total message count.
+
                         messages_queue.append(message)
                         self.message_received.emit(message)
+
+            # except websockets.ConnectionClosed:
+            #     continue
+
             except Exception as e:
                 print(f"WebSocket Error: {e}")
                 print("Reconnecting...")
@@ -63,10 +85,25 @@ class ChatReceiver(QThread):
         asyncio.run(self.receive_chat_messages(CHANNEL_NAME))
 
 
+# Chat = namedtuple(
+#     "Chat",
+#     [
+#         "username",
+#         "message",
+#         "is_toxic",
+#         "is_profanity",
+#         "is_hate_speech",
+#         "is_highlighted",
+#     ],
+# )
+
+
 class ChatWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
+
+        self.classifier = ChatClassifier()
 
     def init_ui(self):
         self.setWindowTitle("Chat")
@@ -82,7 +119,37 @@ class ChatWindow(QWidget):
 
     @pyqtSlot(str)
     def update_chat(self, message):
-        self.text_edit.append(message)
+        match_nick = re.search(r"@(\w+)\.tmi\.twitch\.tv", message)
+        match_chat = re.search(r"PRIVMSG #\w+ :(.*)", message)
+
+        current_time = datetime.now().strftime("%H:%M:%S")
+        username = match_nick.group(1) if match_nick else ""
+        chat_message = match_chat.group(1) if match_chat else ""
+
+        # TODO: Use tuple to store chat data
+
+         # Classify the chat message
+        classification = self.classifier.get_result(chat_message)
+
+        # Get the toxicity likelihood percentage
+        # likelihood = self.classifier.get_toxicity_likelihood(chat_message)
+
+        # Set the default format
+        text_format = QTextCharFormat()
+        text_format.setFont(QFont("Arial", 14))
+
+        # Highlight toxic messages
+        if classification == "Toxic":
+            # if likelihood >= 80:
+            #     text_format.setBackground(QColor("red"))
+            # elif likelihood >= 60 and likelihood < 80:
+            #     text_format.setBackground(QColor("orange"))
+            text_format.setBackground(QColor("red"))
+
+        # Add the formatted message to the QTextEdit
+        self.text_edit.setCurrentCharFormat(text_format)
+        # self.text_edit.append(f"[{current_time}] <{username}> ({likelihood}%) {chat_message}")
+        self.text_edit.append(f"[{current_time}] <{username}> {chat_message}")
 
 
 def main():

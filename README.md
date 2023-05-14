@@ -16,7 +16,6 @@
 ##### ML Classifier
 
 - pandas
-- matplotlib
 - seaborn
 - nltk
 - scikit-learn
